@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth/config'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth()
 
@@ -11,7 +11,7 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const listingId = params.id
+  const { id: listingId } = await params
 
   if (!listingId) {
     return NextResponse.json({ error: 'Listing ID is required' }, { status: 400 })
