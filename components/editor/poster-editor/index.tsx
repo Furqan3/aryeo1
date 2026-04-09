@@ -27,6 +27,8 @@ import {
   applyRealEstateTemplate,
   applyMinimalTemplate,
   applyBoldTemplate,
+  applyElegantGridTemplate,
+  applyCleanListingTemplate,
 } from "@/lib/editor"
 
 interface PosterEditorProps {
@@ -209,13 +211,19 @@ export function PosterEditor({ images, propertyInfo, onComplete, onBack, project
 
       switch (templateId) {
         case "real-estate-classic":
-          await applyRealEstateTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE)
+          await applyRealEstateTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
           break
         case "minimal-modern":
           await applyMinimalTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
           break
         case "bold-luxury":
           await applyBoldTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
+          break
+        case "elegant-grid":
+          await applyElegantGridTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
+          break
+        case "clean-listing":
+          await applyCleanListingTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
           break
       }
 
@@ -649,6 +657,7 @@ export function PosterEditor({ images, propertyInfo, onComplete, onBack, project
           onAddText={addText}
           onAddShape={addShape}
           onOpenTemplates={() => setTemplatesOpen(true)}
+          onSelectTemplate={applyTemplate}
           onUploadImage={handleImageUpload}
           activeTab={activeTab}
           onTabChange={setActiveTab}

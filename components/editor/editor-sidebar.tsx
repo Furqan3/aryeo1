@@ -18,12 +18,14 @@ import {
   Star,
   Hexagon,
   ArrowRight,
+  Sparkles,
 } from "lucide-react"
 
 interface EditorSidebarProps {
   onAddText: () => void
   onAddShape: (shape: string) => void
   onOpenTemplates: () => void
+  onSelectTemplate: (templateId: string) => void
   onUploadImage: () => void
   onStartDrawing?: () => void
   onStartErasing?: () => void
@@ -54,10 +56,46 @@ const textStyles = [
   { id: "body", label: "Add body text", fontSize: 24, fontWeight: "normal" },
 ]
 
+const sidebarTemplates = [
+  {
+    id: "real-estate-classic",
+    name: "Real Estate Classic",
+    description: "Hero + gallery column with stat cards",
+    colors: ["#c0392b", "#d4a574", "#111827"],
+  },
+  {
+    id: "minimal-modern",
+    name: "Minimal Modern",
+    description: "Clean split layout with stat pills",
+    colors: ["#c0392b", "#c9a96e", "#111318"],
+  },
+  {
+    id: "bold-luxury",
+    name: "Bold Luxury",
+    description: "Magazine style with bold stat columns",
+    colors: ["#e74c3c", "#e8b923", "#0a1628"],
+  },
+  {
+    id: "elegant-grid",
+    name: "Elegant Grid",
+    description: "4-image mosaic with center card",
+    colors: ["#c9a96e", "#2ecc71", "#0e0e12"],
+    isNew: true,
+  },
+  {
+    id: "clean-listing",
+    name: "Clean Listing",
+    description: "Light theme with sage accents",
+    colors: ["#6b8f71", "#1a1a1a", "#f8f6f3"],
+    isNew: true,
+  },
+]
+
 export function EditorSidebar({
   onAddText,
   onAddShape,
   onOpenTemplates,
+  onSelectTemplate,
   onUploadImage,
   activeTab,
   onTabChange,
@@ -68,32 +106,38 @@ export function EditorSidebar({
     switch (activeTab) {
       case "templates":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h3 className="font-semibold text-sm text-white">Templates</h3>
             <div className="space-y-2">
-              <button
-                onClick={onOpenTemplates}
-                className="w-full p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 hover:border-blue-500 hover:bg-zinc-800 transition-all text-left group"
-              >
-                <span className="block font-medium text-sm text-white">Real Estate Classic</span>
-                <span className="block text-xs text-zinc-400 mt-1">Hero image with property details</span>
-              </button>
-              <button
-                onClick={onOpenTemplates}
-                className="w-full p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 hover:border-blue-500 hover:bg-zinc-800 transition-all text-left group"
-              >
-                <span className="block font-medium text-sm text-white">Minimal Modern</span>
-                <span className="block text-xs text-zinc-400 mt-1">Split layout with info card</span>
-              </button>
-              <button
-                onClick={onOpenTemplates}
-                className="w-full p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 hover:border-blue-500 hover:bg-zinc-800 transition-all text-left group"
-              >
-                <span className="block font-medium text-sm text-white">Bold Luxury</span>
-                <span className="block text-xs text-zinc-400 mt-1">Magazine style overlay</span>
-              </button>
+              {sidebarTemplates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => onSelectTemplate(template.id)}
+                  className="relative w-full p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 hover:border-blue-500 hover:bg-zinc-800 transition-all text-left group"
+                >
+                  {template.isNew && (
+                    <span className="absolute -top-1.5 -right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-500/90 text-white text-[9px] font-bold uppercase tracking-wide">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      New
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    {template.colors.map((color, i) => (
+                      <div
+                        key={i}
+                        className="w-2.5 h-2.5 rounded-full border border-zinc-600"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                  <span className="block font-medium text-sm text-white group-hover:text-blue-400 transition-colors">
+                    {template.name}
+                  </span>
+                  <span className="block text-xs text-zinc-400 mt-0.5">{template.description}</span>
+                </button>
+              ))}
             </div>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={onOpenTemplates}>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs" onClick={onOpenTemplates}>
               Browse All Templates
             </Button>
           </div>
@@ -185,9 +229,6 @@ export function EditorSidebar({
           </div>
         )
 
-     
-
-      
       default:
         return null
     }

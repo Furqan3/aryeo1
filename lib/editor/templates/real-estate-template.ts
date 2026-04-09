@@ -1,4 +1,4 @@
-import { createImageFrame, generateUniqueId } from '../canvas-helpers'
+import { createImageFrame, generateUniqueId, bringTextToFront } from '../canvas-helpers'
 
 interface PropertyInfo {
   price?: string
@@ -17,7 +17,8 @@ export const applyRealEstateTemplate = async (
   fabricLib: any,
   images: string[],
   propertyInfo: PropertyInfo,
-  canvasSize: { width: number; height: number }
+  canvasSize: { width: number; height: number },
+  saveToHistory?: (canvas: any) => void
 ) => {
   if (!canvas) return
 
@@ -26,74 +27,158 @@ export const applyRealEstateTemplate = async (
 
   const { width, height } = canvasSize
 
-  // Professional color palette
-  const PRIMARY = '#1a1a1a'
-  const SECONDARY = '#2c3e50'
-  const ACCENT = '#e74c3c'
+  // Refined color palette
+  const ACCENT = '#c0392b'
   const GOLD = '#d4a574'
   const WHITE = '#ffffff'
-  const TEXT_LIGHT = '#ecf0f1'
-  const PADDING = 60
-  const GAP = 18
+  const TEXT_LIGHT = '#f0f0f0'
+  const PADDING = 55
+  const GAP = 14
 
   // Layout
-  const LEFT_WIDTH = width * 0.65
+  const LEFT_WIDTH = width * 0.62
   const RIGHT_WIDTH = width - LEFT_WIDTH - GAP
-  const SMALL_IMG_HEIGHT = (height - GAP * 2 - 80) / 3
+  const RIGHT_X = LEFT_WIDTH + GAP
+  const SMALL_IMG_HEIGHT = (height - GAP * 2 - 70) / 3
 
   // 1. Full background hero image
-  await createImageFrame(canvas, fabricLib, images[0] || '', 0, 0, width, height, { cornerRadius: 0 })
+  await createImageFrame(canvas, fabricLib, images[0] || '', 0, 0, LEFT_WIDTH, height, { cornerRadius: 0 })
 
-  // 2. Professional directional gradient overlay
-  const premiumOverlay = new fabricLib.Rect({
+  // 2. Cinematic gradient overlay on hero
+  const heroOverlay = new fabricLib.Rect({
     left: 0,
     top: 0,
-    width: width,
+    width: LEFT_WIDTH,
     height: height,
     fill: new fabricLib.Gradient({
       type: 'linear',
-      coords: { x1: 0, y1: 0, x2: width, y2: height },
+      coords: { x1: 0, y1: 0, x2: 0, y2: height },
       colorStops: [
-        { offset: 0, color: 'rgba(0,0,0,0.25)' },
-        { offset: 0.5, color: 'rgba(0,0,0,0.35)' },
-        { offset: 1, color: 'rgba(0,0,0,0.5)' },
+        { offset: 0, color: 'rgba(0,0,0,0.15)' },
+        { offset: 0.4, color: 'rgba(0,0,0,0.05)' },
+        { offset: 0.7, color: 'rgba(0,0,0,0.25)' },
+        { offset: 1, color: 'rgba(0,0,0,0.75)' },
       ],
     }),
     selectable: false,
     evented: false,
     id: generateUniqueId(),
   })
-  canvas.add(premiumOverlay)
+  canvas.add(heroOverlay)
 
-  // 3. Three elegant small images on the right
+  // 3. Right column dark background
+  const rightBg = new fabricLib.Rect({
+    left: LEFT_WIDTH,
+    top: 0,
+    width: RIGHT_WIDTH + GAP,
+    height: height,
+    fill: '#111827',
+    selectable: false,
+    evented: false,
+    id: generateUniqueId(),
+  })
+  canvas.add(rightBg)
+
+  // 4. Three detail images on right
   const imagesToAdd = [
-    { img: images[1] || '', y: 50 },
-    { img: images[2] || '', y: 50 + SMALL_IMG_HEIGHT + GAP },
-    { img: images[3] || '', y: 50 + SMALL_IMG_HEIGHT * 2 + GAP * 2 },
+    { img: images[1] || images[0], y: 50 },
+    { img: images[2] || images[0], y: 50 + SMALL_IMG_HEIGHT + GAP },
+    { img: images[3] || images[0], y: 50 + SMALL_IMG_HEIGHT * 2 + GAP * 2 },
   ]
 
   for (const imageData of imagesToAdd) {
-    await createImageFrame(canvas, fabricLib, imageData.img, LEFT_WIDTH + GAP, imageData.y, RIGHT_WIDTH, SMALL_IMG_HEIGHT, { cornerRadius: 6 })
+    await createImageFrame(canvas, fabricLib, imageData.img, RIGHT_X, imageData.y, RIGHT_WIDTH - 10, SMALL_IMG_HEIGHT, { cornerRadius: 8 })
   }
 
-  // 4. Premium Price Badge - Professional styling
+  // 5. Gold vertical accent strip between hero and gallery
+  const accentStrip = new fabricLib.Rect({
+    left: LEFT_WIDTH - 2,
+    top: 0,
+    width: 4,
+    height: height,
+    fill: GOLD,
+    selectable: false,
+    evented: false,
+    id: generateUniqueId(),
+  })
+  canvas.add(accentStrip)
+
+  // 6. Top-left corner frame accent
+  const cornerTopH = new fabricLib.Rect({
+    left: PADDING - 10,
+    top: PADDING - 10,
+    width: 80,
+    height: 3,
+    fill: GOLD,
+    selectable: false,
+    evented: false,
+    id: generateUniqueId(),
+  })
+  canvas.add(cornerTopH)
+
+  const cornerTopV = new fabricLib.Rect({
+    left: PADDING - 10,
+    top: PADDING - 10,
+    width: 3,
+    height: 80,
+    fill: GOLD,
+    selectable: false,
+    evented: false,
+    id: generateUniqueId(),
+  })
+  canvas.add(cornerTopV)
+
+  // 7. Property Type Tag
+  const typeValue = (propertyInfo?.property_type || 'Luxury Villa').toUpperCase()
+
+  const typeBg = new fabricLib.Rect({
+    left: PADDING,
+    top: PADDING + 25,
+    width: 180,
+    height: 36,
+    rx: 4,
+    ry: 4,
+    fill: ACCENT,
+    selectable: false,
+    evented: false,
+    id: generateUniqueId(),
+  })
+  canvas.add(typeBg)
+
+  const typeText = new fabricLib.Textbox(typeValue, {
+    left: PADDING + 14,
+    top: PADDING + 31,
+    fontSize: 13,
+    fontWeight: 700,
+    fill: WHITE,
+    fontFamily: "'Poppins', 'Inter', Arial, sans-serif",
+    selectable: true,
+    evented: true,
+    editable: true,
+    letterSpacing: 2.5,
+    width: 155,
+    id: generateUniqueId(),
+  })
+  canvas.add(typeText)
+
+  // 8. Price badge - frosted glass style
   const priceValue = propertyInfo?.price || '$1,250,000'
 
   const priceBg = new fabricLib.Rect({
     left: PADDING,
-    top: PADDING,
-    rx: 12,
-    ry: 12,
-    width: 480,
-    height: 95,
-    fill: 'rgba(20, 20, 20, 0.9)',
-    stroke: GOLD,
-    strokeWidth: 2,
+    top: PADDING + 75,
+    rx: 10,
+    ry: 10,
+    width: 420,
+    height: 90,
+    fill: 'rgba(0, 0, 0, 0.65)',
+    stroke: 'rgba(212, 165, 116, 0.5)',
+    strokeWidth: 1.5,
     selectable: true,
     evented: true,
     shadow: new fabricLib.Shadow({
-      color: 'rgba(212, 165, 116, 0.35)',
-      blur: 25,
+      color: 'rgba(0, 0, 0, 0.5)',
+      blur: 30,
       offsetX: 0,
       offsetY: 10,
     }),
@@ -102,67 +187,51 @@ export const applyRealEstateTemplate = async (
   canvas.add(priceBg)
 
   const priceText = new fabricLib.Textbox(priceValue, {
-    left: PADDING + 30,
-    top: PADDING + 18,
-    fontSize: 58,
+    left: PADDING + 25,
+    top: PADDING + 90,
+    fontSize: 54,
     fontWeight: 800,
     fill: GOLD,
     fontFamily: "'Poppins', 'Inter', Arial, sans-serif",
     selectable: true,
     evented: true,
     editable: true,
-    width: 420,
+    width: 380,
     id: generateUniqueId(),
   })
   canvas.add(priceText)
 
-  // 5. Property Type - Professional tag
-  const typeText = new fabricLib.Textbox((propertyInfo?.property_type || 'Luxury Villa').toUpperCase(), {
-    left: PADDING,
-    top: PADDING + 110,
-    fontSize: 18,
-    fontWeight: 700,
-    fill: ACCENT,
-    fontFamily: "'Poppins', 'Inter', Arial, sans-serif",
-    selectable: true,
-    evented: true,
-    editable: true,
-    letterSpacing: 2.5,
-    width: 500,
-    id: generateUniqueId(),
-  })
-  canvas.add(typeText)
+  // 9. Footer area with property info
+  const footerY = height - 260
 
-  // 6. Professional Footer Area
-  const footerY = height - 280
-
-  // Sophisticated gradient footer band
+  // Gradient footer
   const footerBand = new fabricLib.Rect({
     left: 0,
     top: footerY,
-    width: width,
-    height: 280,
+    width: LEFT_WIDTH,
+    height: 260,
     fill: new fabricLib.Gradient({
       type: 'linear',
-      coords: { x1: 0, y1: footerY, x2: 0, y2: height },
+      coords: { x1: 0, y1: 0, x2: 0, y2: 260 },
       colorStops: [
-        { offset: 0, color: 'rgba(0, 0, 0, 0.2)' },
-        { offset: 1, color: 'rgba(0, 0, 0, 0.8)' },
+        { offset: 0, color: 'rgba(0, 0, 0, 0)' },
+        { offset: 0.4, color: 'rgba(0, 0, 0, 0.5)' },
+        { offset: 1, color: 'rgba(0, 0, 0, 0.85)' },
       ],
     }),
-    selectable: true,
-    evented: true,
+    selectable: false,
+    evented: false,
     id: generateUniqueId(),
   })
   canvas.add(footerBand)
 
-  // Elegant accent line
+  // Gold accent line
   const accentLine = new fabricLib.Rect({
     left: PADDING,
-    top: footerY + 8,
-    width: 120,
+    top: footerY + 50,
+    width: 60,
     height: 4,
-    fill: ACCENT,
+    fill: GOLD,
     rx: 2,
     ry: 2,
     selectable: false,
@@ -171,63 +240,122 @@ export const applyRealEstateTemplate = async (
   })
   canvas.add(accentLine)
 
-  // Address - Professional layout
+  // Address
   const address = propertyInfo?.address || '123 Ocean Drive'
   const cityLine = propertyInfo
-    ? `${propertyInfo.city}, ${propertyInfo.state} ${propertyInfo.zip_code}`
+    ? `${propertyInfo.city || 'Miami Beach'}, ${propertyInfo.state || 'FL'} ${propertyInfo.zip_code || '33139'}`
     : 'Miami Beach, FL 33139'
 
-  const addressText = new fabricLib.Textbox(`${address}\n${cityLine}`, {
+  const addressText = new fabricLib.Textbox(address, {
     left: PADDING,
-    top: footerY + 35,
-    fontSize: 32,
+    top: footerY + 65,
+    fontSize: 30,
     fontWeight: 700,
-    fill: TEXT_LIGHT,
+    fill: WHITE,
     fontFamily: "'Poppins', 'Inter', Arial, sans-serif",
     selectable: true,
     evented: true,
     editable: true,
-    width: width * 0.55,
-    lineHeight: 1.4,
+    width: LEFT_WIDTH - PADDING * 2,
+    lineHeight: 1.3,
     shadow: new fabricLib.Shadow({
-      color: 'rgba(0,0,0,0.4)',
-      blur: 15,
+      color: 'rgba(0,0,0,0.5)',
+      blur: 10,
       offsetX: 0,
-      offsetY: 6,
+      offsetY: 4,
     }),
     id: generateUniqueId(),
   })
   canvas.add(addressText)
 
-  // Details
+  const cityText = new fabricLib.Textbox(cityLine, {
+    left: PADDING,
+    top: footerY + 105,
+    fontSize: 16,
+    fontWeight: 400,
+    fill: 'rgba(255,255,255,0.7)',
+    fontFamily: "'Inter', Arial, sans-serif",
+    selectable: true,
+    evented: true,
+    editable: true,
+    width: LEFT_WIDTH - PADDING * 2,
+    id: generateUniqueId(),
+  })
+  canvas.add(cityText)
+
+  // 10. Stat cards row
   const beds = propertyInfo?.bedrooms || '4'
   const baths = propertyInfo?.bathrooms || '3'
   const sqft = propertyInfo?.square_feet ? Number(propertyInfo.square_feet).toLocaleString() : '2,800'
 
-  const detailsText = new fabricLib.Textbox(`${beds} BEDROOMS  ${baths} BATHROOMS  ${sqft} SQ FT`, {
-    left: width - PADDING - 420,
-    top: footerY + 50,
-    fontSize: 26,
-    fontWeight: 600,
-    fill: GOLD,
-    fontFamily: "'Poppins', 'Inter', Arial, sans-serif",
-    selectable: true,
-    evented: true,
-    editable: true,
-    width: 420,
-    textAlign: 'right',
-    letterSpacing: 1,
-    id: generateUniqueId(),
-  })
-  canvas.add(detailsText)
+  const statCardWidth = 135
+  const statCardHeight = 65
+  const statCardGap = 14
+  const statY = footerY + 145
 
-  // Bring all text and editable elements to front
-  setTimeout(() => {
-    canvas.getObjects().forEach((obj: any) => {
-      if (obj.type === 'textbox' || obj.type === 'rect' || obj.type === 'text') {
-        canvas.bringToFront(obj)
-      }
+  const stats = [
+    { value: `${beds}`, label: 'BEDS' },
+    { value: `${baths}`, label: 'BATHS' },
+    { value: sqft, label: 'SQ FT' },
+  ]
+
+  stats.forEach((stat, i) => {
+    const x = PADDING + i * (statCardWidth + statCardGap)
+
+    // Card background
+    const cardBg = new fabricLib.Rect({
+      left: x,
+      top: statY,
+      width: statCardWidth,
+      height: statCardHeight,
+      rx: 8,
+      ry: 8,
+      fill: 'rgba(255, 255, 255, 0.08)',
+      stroke: 'rgba(212, 165, 116, 0.3)',
+      strokeWidth: 1,
+      selectable: false,
+      evented: false,
+      id: generateUniqueId(),
     })
-    canvas.renderAll()
-  }, 400)
+    canvas.add(cardBg)
+
+    // Stat value
+    const valueText = new fabricLib.Textbox(stat.value, {
+      left: x + 15,
+      top: statY + 10,
+      fontSize: 24,
+      fontWeight: 800,
+      fill: GOLD,
+      fontFamily: "'Poppins', Arial, sans-serif",
+      selectable: true,
+      evented: true,
+      editable: true,
+      width: statCardWidth - 30,
+      id: generateUniqueId(),
+    })
+    canvas.add(valueText)
+
+    // Stat label
+    const labelText = new fabricLib.Textbox(stat.label, {
+      left: x + 15,
+      top: statY + 38,
+      fontSize: 11,
+      fontWeight: 600,
+      fill: 'rgba(255,255,255,0.5)',
+      fontFamily: "'Inter', Arial, sans-serif",
+      selectable: true,
+      evented: true,
+      editable: true,
+      letterSpacing: 1.5,
+      width: statCardWidth - 30,
+      id: generateUniqueId(),
+    })
+    canvas.add(labelText)
+  })
+
+  // Final render
+  setTimeout(() => {
+    bringTextToFront(canvas)
+    if (saveToHistory) saveToHistory(canvas)
+  }, 500)
 }
