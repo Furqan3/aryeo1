@@ -3,8 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
-import { Search, LayoutTemplate, Check } from "lucide-react"
+import { LayoutTemplate, Check } from "lucide-react"
 import { useState } from "react"
 
 interface TemplatesDialogProps {
@@ -13,11 +12,7 @@ interface TemplatesDialogProps {
   onSelectTemplate: (templateId: string) => void
 }
 
-const categories = ["All", "Real Estate", "Social Media", "Marketing", "Minimal"]
-
 export function TemplatesDialog({ open, onClose, onSelectTemplate }: TemplatesDialogProps) {
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [searchQuery, setSearchQuery] = useState("")
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
 
   const templates = [
@@ -44,14 +39,6 @@ export function TemplatesDialog({ open, onClose, onSelectTemplate }: TemplatesDi
     },
   ]
 
-  const filteredTemplates = templates.filter((template) => {
-    const matchesCategory = selectedCategory === "All" || template.category === selectedCategory
-    const matchesSearch =
-      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
-
   const handleSelectTemplate = (templateId: string) => {
     setSelectedTemplate(templateId)
   }
@@ -73,39 +60,9 @@ export function TemplatesDialog({ open, onClose, onSelectTemplate }: TemplatesDi
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 border-b border-zinc-700 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-            <Input
-              placeholder="Search templates..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
-            />
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "secondary"}
-                size="sm"
-                className={
-                  selectedCategory === category
-                    ? "rounded-full whitespace-nowrap bg-blue-600 hover:bg-blue-700"
-                    : "rounded-full whitespace-nowrap bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
-                }
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </div>
-
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-3">
-            {filteredTemplates.map((template) => (
+            {templates.map((template) => (
               <button
                 key={template.id}
                 className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
@@ -136,16 +93,6 @@ export function TemplatesDialog({ open, onClose, onSelectTemplate }: TemplatesDi
               </button>
             ))}
           </div>
-
-          {filteredTemplates.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-40 text-center">
-              <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
-                <LayoutTemplate className="w-6 h-6 text-zinc-500" />
-              </div>
-              <p className="text-sm font-medium text-white mb-1">No templates found</p>
-              <p className="text-xs text-zinc-500">Try adjusting your search or filters</p>
-            </div>
-          )}
         </ScrollArea>
 
         <div className="p-4 border-t border-zinc-700 flex justify-end gap-2">

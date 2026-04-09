@@ -128,7 +128,7 @@ export function StepThree({ initialData, onComplete, onBack }: StepThreeProps) {
               id="bathrooms"
               name="bathrooms"
               type="number"
-              step="1"
+              step="0.5"
               min="0"
               placeholder="0"
               value={formData.bathrooms}

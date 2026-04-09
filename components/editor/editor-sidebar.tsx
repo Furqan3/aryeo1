@@ -33,8 +33,8 @@ interface EditorSidebarProps {
 
 const tools = [
   { id: "templates", icon: LayoutTemplate, label: "Templates" },
-  { id: "elements", icon: Shapes, label: "Elements" },
   { id: "text", icon: Type, label: "Text" },
+  { id: "elements", icon: Shapes, label: "Elements" },
   { id: "uploads", icon: Upload, label: "Upload" },
 ]
 
