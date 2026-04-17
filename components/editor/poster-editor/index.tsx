@@ -22,13 +22,12 @@ import {
   generateUniqueId,
   initializeCanvasSelection,
   createImageFrame,
+  attachSnapAlign,
   useCanvasHistory,
   useLayers,
   applyRealEstateTemplate,
   applyMinimalTemplate,
   applyBoldTemplate,
-  applyElegantGridTemplate,
-  applyCleanListingTemplate,
 } from "@/lib/editor"
 
 interface PosterEditorProps {
@@ -151,6 +150,8 @@ export function PosterEditor({ images, propertyInfo, onComplete, onBack, project
         initializeCanvasSelection(fabricLib, fabricCanvas)
       }
 
+      attachSnapAlign(fabricCanvas)
+
       fabricCanvas.on("selection:created", (e: any) => setActiveObject(e.selected[0]))
       fabricCanvas.on("selection:updated", (e: any) => setActiveObject(e.selected[0]))
       fabricCanvas.on("selection:cleared", () => setActiveObject(null))
@@ -218,12 +219,6 @@ export function PosterEditor({ images, propertyInfo, onComplete, onBack, project
           break
         case "bold-luxury":
           await applyBoldTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
-          break
-        case "elegant-grid":
-          await applyElegantGridTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
-          break
-        case "clean-listing":
-          await applyCleanListingTemplate(canvas, fabricLib, images, propertyInfo, CANVAS_SIZE, saveToHistory)
           break
       }
 

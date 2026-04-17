@@ -90,20 +90,7 @@ export const applyRealEstateTemplate = async (
     await createImageFrame(canvas, fabricLib, imageData.img, RIGHT_X, imageData.y, RIGHT_WIDTH - 10, SMALL_IMG_HEIGHT, { cornerRadius: 8 })
   }
 
-  // 5. Gold vertical accent strip between hero and gallery
-  const accentStrip = new fabricLib.Rect({
-    left: LEFT_WIDTH - 2,
-    top: 0,
-    width: 4,
-    height: height,
-    fill: GOLD,
-    selectable: false,
-    evented: false,
-    id: generateUniqueId(),
-  })
-  canvas.add(accentStrip)
-
-  // 6. Top-left corner frame accent
+  // 5. Top-left corner frame accent
   const cornerTopH = new fabricLib.Rect({
     left: PADDING - 10,
     top: PADDING - 10,
@@ -249,7 +236,7 @@ export const applyRealEstateTemplate = async (
   const addressText = new fabricLib.Textbox(address, {
     left: PADDING,
     top: footerY + 65,
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: 700,
     fill: WHITE,
     fontFamily: "'Poppins', 'Inter', Arial, sans-serif",
@@ -257,7 +244,7 @@ export const applyRealEstateTemplate = async (
     evented: true,
     editable: true,
     width: LEFT_WIDTH - PADDING * 2,
-    lineHeight: 1.3,
+    lineHeight: 1.15,
     shadow: new fabricLib.Shadow({
       color: 'rgba(0,0,0,0.5)',
       blur: 10,
@@ -270,7 +257,7 @@ export const applyRealEstateTemplate = async (
 
   const cityText = new fabricLib.Textbox(cityLine, {
     left: PADDING,
-    top: footerY + 105,
+    top: footerY + 115,
     fontSize: 16,
     fontWeight: 400,
     fill: 'rgba(255,255,255,0.7)',
@@ -279,6 +266,7 @@ export const applyRealEstateTemplate = async (
     evented: true,
     editable: true,
     width: LEFT_WIDTH - PADDING * 2,
+    lineHeight: 1.2,
     id: generateUniqueId(),
   })
   canvas.add(cityText)
@@ -291,7 +279,7 @@ export const applyRealEstateTemplate = async (
   const statCardWidth = 135
   const statCardHeight = 65
   const statCardGap = 14
-  const statY = footerY + 145
+  const statY = footerY + 160
 
   const stats = [
     { value: `${beds}`, label: 'BEDS' },

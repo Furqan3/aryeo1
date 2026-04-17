@@ -142,7 +142,7 @@ export const applyMinimalTemplate = async (
 
   const addressText = new fabricLib.Textbox(fullAddress, {
     left: PADDING,
-    top: contentTop + 105,
+    top: contentTop + 110,
     fontSize: 20,
     fontFamily: "'Poppins', 'Inter', Arial, sans-serif",
     fontWeight: 600,
@@ -150,20 +150,22 @@ export const applyMinimalTemplate = async (
     selectable: true,
     editable: true,
     width: width - PADDING * 2,
-    lineHeight: 1.2,
+    lineHeight: 1.15,
     id: generateUniqueId(),
   })
   canvas.add(addressText)
 
   const cityText = new fabricLib.Textbox(cityState, {
     left: PADDING,
-    top: contentTop + 133,
+    top: contentTop + 142,
     fontSize: 14,
     fontFamily: "'Inter', Arial, sans-serif",
     fontWeight: 400,
     fill: TEXT_MUTED,
     selectable: true,
     editable: true,
+    width: width - PADDING * 2,
+    lineHeight: 1.2,
     id: generateUniqueId(),
   })
   canvas.add(cityText)
@@ -179,7 +181,7 @@ export const applyMinimalTemplate = async (
     { text: `${sqft} Sq Ft`, w: 130 },
   ]
 
-  const pillY = contentTop + 168
+  const pillY = contentTop + 182
   const pillH = 38
   const pillGap = 12
   let pillX = PADDING

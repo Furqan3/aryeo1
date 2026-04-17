@@ -17,37 +17,45 @@ export const debounce = (func: (...args: any[]) => void, delay: number) => {
 }
 
 /**
- * Create an image frame on the canvas
+ * Create an image frame on the canvas.
+ * Fills the given box (cover behavior) and centers the crop, so the
+ * object's bounding box matches the requested frame exactly.
  */
 export const createImageFrame = (
-canvas: any, fabricLib: any, imageUrl: string, left: number, top: number, width: number, height: number, p0: { cornerRadius: number }) => {
+  canvas: any,
+  fabricLib: any,
+  imageUrl: string,
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+  _options: { cornerRadius: number }
+) => {
   return new Promise<any>((resolve) => {
     fabricLib.Image.fromURL(
       imageUrl,
       (img: any) => {
-        const scaleX = width / img.width!
-        const scaleY = height / img.height!
-        const scale = Math.max(scaleX, scaleY)
+        const naturalW = img.width!
+        const naturalH = img.height!
+
+        const scale = Math.max(width / naturalW, height / naturalH)
+
+        const visibleW = Math.min(naturalW, width / scale)
+        const visibleH = Math.min(naturalH, height / scale)
 
         img.set({
           left,
           top,
           scaleX: scale,
           scaleY: scale,
+          cropX: Math.max(0, (naturalW - visibleW) / 2),
+          cropY: Math.max(0, (naturalH - visibleH) / 2),
+          width: visibleW,
+          height: visibleH,
           selectable: true,
           hasControls: true,
           id: generateUniqueId(),
         })
-
-        const scaledWidth = img.width! * scale
-        if (scaledWidth > width) {
-          img.set({ cropX: (img.width! - width / scale) / 2 })
-        }
-
-        const scaledHeight = img.height! * scale
-        if (scaledHeight > height) {
-          img.set({ cropY: (img.height! - height / scale) / 2 })
-        }
 
         canvas.add(img)
         canvas.renderAll()
