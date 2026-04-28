@@ -323,23 +323,51 @@ export function PosterEditor({ images, propertyInfo, onComplete, onBack, project
       if (!activeObject || !canvas || activeObject.type !== "image") return
       const fabricLib = (window as any).fabric
 
+      const targetWidth = activeObject.getScaledWidth()
+      const targetHeight = activeObject.getScaledHeight()
+      const targetLeft = activeObject.left
+      const targetTop = activeObject.top
+      const targetAngle = activeObject.angle
+      const targetOpacity = activeObject.opacity
+      const targetOriginX = activeObject.originX
+      const targetOriginY = activeObject.originY
+      const targetFlipX = activeObject.flipX
+      const targetFlipY = activeObject.flipY
+      const targetId = activeObject.id
+      const zIndex = canvas.getObjects().indexOf(activeObject)
+
       fabricLib.Image.fromURL(
         newImageUrl,
         (newImg: any) => {
           if (!newImg) return
 
+          const naturalW = newImg.width
+          const naturalH = newImg.height
+          const scale = Math.max(targetWidth / naturalW, targetHeight / naturalH)
+          const visibleW = Math.min(naturalW, targetWidth / scale)
+          const visibleH = Math.min(naturalH, targetHeight / scale)
+
           newImg.set({
-            left: activeObject.left,
-            top: activeObject.top,
-            scaleX: activeObject.scaleX,
-            scaleY: activeObject.scaleY,
-            angle: activeObject.angle,
-            opacity: activeObject.opacity,
-            id: activeObject.id,
+            left: targetLeft,
+            top: targetTop,
+            originX: targetOriginX,
+            originY: targetOriginY,
+            scaleX: scale,
+            scaleY: scale,
+            cropX: Math.max(0, (naturalW - visibleW) / 2),
+            cropY: Math.max(0, (naturalH - visibleH) / 2),
+            width: visibleW,
+            height: visibleH,
+            angle: targetAngle,
+            opacity: targetOpacity,
+            flipX: targetFlipX,
+            flipY: targetFlipY,
+            id: targetId,
           })
 
           canvas.remove(activeObject)
           canvas.add(newImg)
+          if (zIndex >= 0) newImg.moveTo(zIndex)
           canvas.setActiveObject(newImg)
           canvas.renderAll()
           saveToHistory(canvas)

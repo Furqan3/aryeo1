@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Switch } from "@/components/ui/switch"
@@ -39,6 +39,7 @@ import {
 } from "lucide-react"
 import { useState, useCallback, useMemo, useEffect } from "react"
 import { ImageCropper } from "@/components/ui/image-cropper"
+import { FONT_GROUPS, loadFont } from "@/lib/editor/fonts"
 
 interface PropertiesPanelProps {
   activeObject: any
@@ -84,20 +85,6 @@ const gradientPresets = [
   { name: "Night", colors: ["#0F172A", "#334155"], angle: 45 },
   { name: "Cherry", colors: ["#FDA4AF", "#F0ABFC"], angle: 90 },
   { name: "Gold", colors: ["#D97706", "#FBBF24"], angle: 135 },
-]
-
-// Font families
-const fontFamilies = [
-  "Arial",
-  "Helvetica",
-  "Times New Roman",
-  "Georgia",
-  "Verdana",
-  "Courier New",
-  "Comic Sans MS",
-  "Impact",
-  "Trebuchet MS",
-  "Palatino",
 ]
 
 // Font weights
@@ -813,16 +800,30 @@ export function PropertiesPanel({ activeObject, onUpdate, onDuplicate, onReplace
                         <Label className="text-xs text-muted-foreground mb-1 block">Font</Label>
                         <Select
                           value={activeObject.fontFamily || "Arial"}
-                          onValueChange={(v) => onUpdate("fontFamily", v)}
+                          onValueChange={async (v) => {
+                            await loadFont(v, activeObject.fontWeight || 400)
+                            onUpdate("fontFamily", v)
+                          }}
                         >
                           <SelectTrigger className="h-8 text-xs">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
-                            {fontFamilies.map((font) => (
-                              <SelectItem key={font} value={font}>
-                                {font}
-                              </SelectItem>
+                          <SelectContent className="max-h-72">
+                            {FONT_GROUPS.map((group) => (
+                              <SelectGroup key={group.label}>
+                                <SelectLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                                  {group.label}
+                                </SelectLabel>
+                                {group.fonts.map((font) => (
+                                  <SelectItem
+                                    key={font}
+                                    value={font}
+                                    style={{ fontFamily: `"${font}", sans-serif` }}
+                                  >
+                                    {font}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
                             ))}
                           </SelectContent>
                         </Select>
@@ -831,7 +832,10 @@ export function PropertiesPanel({ activeObject, onUpdate, onDuplicate, onReplace
                         <Label className="text-xs text-muted-foreground mb-1 block">Weight</Label>
                         <Select
                           value={String(activeObject.fontWeight || "400")}
-                          onValueChange={(v) => onUpdate("fontWeight", v)}
+                          onValueChange={async (v) => {
+                            if (activeObject.fontFamily) await loadFont(activeObject.fontFamily, v)
+                            onUpdate("fontWeight", v)
+                          }}
                         >
                           <SelectTrigger className="h-8 text-xs">
                             <SelectValue />
